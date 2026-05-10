@@ -30,7 +30,7 @@ The `IErpAdapter` interface defines exactly what the sync pipeline needs from an
 
 Two implementations ship with the project:
 
-**`SqlErpAdapter`** — for ERPs that expose a SQL database or ORM (Logo Tiger, Mikro, custom in-house systems). Uses Entity Framework directly. Fastest path; no HTTP overhead.
+**`SqlErpAdapter`** — for ERPs that expose a SQL database or ORM (custom in-house systems, legacy databases). Uses Entity Framework directly. Fastest path; no HTTP overhead.
 
 **`RestApiErpAdapter`** — for cloud ERPs (NetSuite, SAP Business One, Odoo, Microsoft Dynamics). Demonstrates the HTTP call pattern with realistic latency simulation. In production, replace the mock HTTP calls with real Refit or HttpClient calls to the ERP's REST API.
 

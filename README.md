@@ -61,7 +61,7 @@ sequenceDiagram
 - **Database transactions** — customer + order + stock + invoice created atomically or not at all
 
 ### Adaptability
-- **ERP adapter pattern** — swap between SQL-based ERPs (Logo, Mikro) and REST-based ERPs (NetSuite, SAP, Odoo, Dynamics) via one config line
+- **ERP adapter pattern** — swap between SQL-based ERPs (custom databases, legacy systems) and REST-based ERPs (NetSuite, SAP, Odoo, Dynamics 365) via one config line
 - **Interface-driven** — `IErpAdapter` has 4 methods; implement them for any ERP in under 200 lines
 
 ### Observability
