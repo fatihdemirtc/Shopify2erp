@@ -166,7 +166,7 @@ And register in `DependencyInjection.cs`. Done.
 
 I build Shopify integrations, ERP connectors, and custom backoffice systems for e-commerce companies.
 
-**[Hire me on Upwork](#)** ← add your profile link
+**[Hire me on Upwork](https://www.upwork.com/freelancers/~01986f4dab905abf14)**
 
 ---
 
