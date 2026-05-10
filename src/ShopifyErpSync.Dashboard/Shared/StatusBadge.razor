@@ -1,14 +1,17 @@
 @{
-    var (bg, text) = Status?.ToLower() switch
+    var (bgVar, colorVar, ring, icon) = Status?.ToLower() switch
     {
-        "completed" or "created" or "synced" => ("bg-emerald-100", "text-emerald-700"),
-        "pending"   => ("bg-amber-100",  "text-amber-700"),
-        "processing"=> ("bg-blue-100",   "text-blue-700"),
-        "failed"    => ("bg-red-100",    "text-red-700"),
-        _           => ("bg-slate-100",  "text-slate-700")
+        "completed" or "created" or "synced" => ("var(--success-bg)", "var(--success)", "#6ee7b7", "✓"),
+        "pending"    => ("var(--warning-bg)", "var(--warning)", "#fcd34d", "⏳"),
+        "processing" => ("#dbeafe",           "#2563eb",        "#93c5fd", "↻"),
+        "failed"     => ("var(--error-bg)",   "var(--error)",   "#fca5a5", "✕"),
+        _            => ("#f1f5f9",           "#64748b",        "#cbd5e1", "·")
     };
 }
-<span class="px-2 py-0.5 rounded text-xs font-medium @bg @text">@Status</span>
+<span style="background:@bgVar; color:@colorVar; box-shadow:0 0 0 1px @ring inset;"
+      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium">
+    <span class="text-[10px]">@icon</span>@Status
+</span>
 
 @code {
     [Parameter] public string? Status { get; set; }

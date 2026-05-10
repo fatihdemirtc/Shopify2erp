@@ -10,6 +10,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="~/" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['system-ui', '-apple-system', 'Segoe UI', 'sans-serif'] },
+                    boxShadow: {
+                        'card': '0 1px 3px 0 rgb(0 0 0 / 0.07), 0 4px 12px -2px rgb(0 0 0 / 0.06)'
+                    },
+                    colors: {
+                        success:  { DEFAULT: 'var(--success)',    bg: 'var(--success-bg)' },
+                        warning:  { DEFAULT: 'var(--warning)',    bg: 'var(--warning-bg)' },
+                        error:    { DEFAULT: 'var(--error)',      bg: 'var(--error-bg)'   },
+                        sidebar:  { DEFAULT: 'var(--sidebar-bg)'                          },
+                        card:     { DEFAULT: 'var(--card-bg)'                             },
+                        page:     { DEFAULT: 'var(--page-bg)'                             },
+                    }
+                }
+            }
+        }
+    </script>
     <link href="css/site.css" rel="stylesheet" />
     <link rel="icon" type="image/png" href="favicon.png"/>
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />

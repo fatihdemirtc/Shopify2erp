@@ -2,22 +2,19 @@ using System.Text.Json.Serialization;
 
 namespace ShopifyErpSync.Core.Models.Shopify;
 
-public class ShopifyCustomer
+public class ShopifyAddress
 {
-    [JsonPropertyName("id")]
-    public long Id { get; set; }
-
     [JsonPropertyName("first_name")]
     public string? FirstName { get; set; }
 
     [JsonPropertyName("last_name")]
     public string? LastName { get; set; }
 
-    public string Name => $"{FirstName} {LastName}".Trim();
-
     [JsonPropertyName("email")]
     public string? Email { get; set; }
 
     [JsonPropertyName("phone")]
     public string? Phone { get; set; }
+
+    public string Name => $"{FirstName} {LastName}".Trim();
 }

@@ -47,7 +47,7 @@ public class SqlErpAdapter : IErpAdapter
         var order = new Order
         {
             ShopifyOrderId = shopifyOrder.Id,
-            OrderNumber = shopifyOrder.OrderNumber,
+            OrderNumber = shopifyOrder.OrderNumber.ToString(),
             Customer = customer,
             Subtotal = shopifyOrder.Subtotal,
             Vat = shopifyOrder.Vat,
@@ -57,6 +57,12 @@ public class SqlErpAdapter : IErpAdapter
 
         foreach (var lineItem in shopifyOrder.LineItems)
         {
+            if (string.IsNullOrEmpty(lineItem.Sku))
+            {
+                _logger.LogWarning("Line item '{Name}' has no SKU — skipping", lineItem.Name);
+                continue;
+            }
+
             var product = await _db.Products
                 .FirstOrDefaultAsync(p => p.Sku == lineItem.Sku, ct);
 

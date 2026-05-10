@@ -8,20 +8,30 @@ public class ShopifyOrder
     public long Id { get; set; }
 
     [JsonPropertyName("order_number")]
-    public required string OrderNumber { get; set; }
+    public long OrderNumber { get; set; }
+
+    [JsonPropertyName("total_price")]
+    [System.Text.Json.Serialization.JsonNumberHandling(System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString)]
+    public decimal Total { get; set; }
+
+    [JsonPropertyName("subtotal_price")]
+    [System.Text.Json.Serialization.JsonNumberHandling(System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString)]
+    public decimal Subtotal { get; set; }
+
+    [JsonPropertyName("total_tax")]
+    [System.Text.Json.Serialization.JsonNumberHandling(System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString)]
+    public decimal Vat { get; set; }
 
     [JsonPropertyName("customer")]
-    public required ShopifyCustomer Customer { get; set; }
+    public ShopifyCustomer? Customer { get; set; }
+
+    [JsonPropertyName("email")]
+    public string? Email { get; set; }
+
+    [JsonPropertyName("billing_address")]
+    public ShopifyAddress? BillingAddress { get; set; }
 
     [JsonPropertyName("line_items")]
     public IList<ShopifyLineItem> LineItems { get; set; } = new List<ShopifyLineItem>();
 
-    [JsonPropertyName("subtotal")]
-    public decimal Subtotal { get; set; }
-
-    [JsonPropertyName("vat")]
-    public decimal Vat { get; set; }
-
-    [JsonPropertyName("total")]
-    public decimal Total { get; set; }
 }

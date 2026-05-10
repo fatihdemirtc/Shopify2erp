@@ -38,8 +38,15 @@
         font-size: 0.875rem;
         color: #94a3b8;
         text-decoration: none;
-        transition: background 0.1s, color 0.1s;
+        transition: background 0.15s, color 0.15s;
+        border-left: 2px solid transparent;
     }
     .nav-item:hover { background: #1e293b; color: #e2e8f0; }
-    .nav-item-active { background: #1e293b; color: #f8fafc; font-weight: 500; }
+    .nav-item-active {
+        background: rgba(99,102,241,0.12);
+        color: #e0e7ff;
+        font-weight: 500;
+        border-left: 2px solid #6366f1;
+        padding-left: calc(0.75rem - 0px);
+    }
 </style>

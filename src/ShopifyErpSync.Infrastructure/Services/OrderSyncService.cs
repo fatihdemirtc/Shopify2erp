@@ -45,11 +45,19 @@ public class OrderSyncService : IOrderSyncService
         using var transaction = await _db.Database.BeginTransactionAsync(ct);
         try
         {
-            var customer = await _erp.GetOrCreateCustomerAsync(shopifyOrder.Customer, ct);
+            var shopifyCustomer = shopifyOrder.Customer ?? new ShopifyCustomer
+            {
+                Id = 0,
+                FirstName = shopifyOrder.BillingAddress?.FirstName ?? "Guest",
+                LastName = shopifyOrder.BillingAddress?.LastName ?? "",
+                Email = shopifyOrder.Email ?? shopifyOrder.BillingAddress?.Email,
+                Phone = shopifyOrder.BillingAddress?.Phone
+            };
+            var customer = await _erp.GetOrCreateCustomerAsync(shopifyCustomer, ct);
             var order = await _erp.CreateOrderAsync(shopifyOrder, customer, ct);
 
-            foreach (var lineItem in shopifyOrder.LineItems)
-                await _erp.DecrementStockAsync(lineItem.Sku, lineItem.Quantity, ct);
+            foreach (var lineItem in shopifyOrder.LineItems.Where(l => !string.IsNullOrEmpty(l.Sku)))
+                await _erp.DecrementStockAsync(lineItem.Sku!, lineItem.Quantity, ct);
 
             await _erp.GenerateInvoiceAsync(order, ct);
 

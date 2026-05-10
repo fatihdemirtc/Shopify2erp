@@ -58,7 +58,7 @@ public class RestApiErpAdapter : IErpAdapter
         var order = new Order
         {
             ShopifyOrderId = shopifyOrder.Id,
-            OrderNumber = shopifyOrder.OrderNumber,
+            OrderNumber = shopifyOrder.OrderNumber.ToString(),
             Customer = customer,
             Subtotal = shopifyOrder.Subtotal,
             Vat = shopifyOrder.Vat,
