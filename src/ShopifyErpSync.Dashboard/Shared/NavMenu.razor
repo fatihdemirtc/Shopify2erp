@@ -1,0 +1,45 @@
+<nav class="flex flex-col h-full py-6 px-3">
+    <div class="mb-8 px-3">
+        <span class="text-white font-bold text-base tracking-tight">ShopifyERP</span>
+        <span class="block text-slate-400 text-xs mt-0.5">Sync Monitor</span>
+    </div>
+
+    <ul class="flex flex-col gap-0.5 flex-1">
+        <li><NavLink href="/" Match="NavLinkMatch.All" class="nav-item" ActiveClass="nav-item-active">
+            <span class="mr-2.5">⬛</span>Dashboard
+        </NavLink></li>
+        <li><NavLink href="/orders" class="nav-item" ActiveClass="nav-item-active">
+            <span class="mr-2.5">📦</span>Orders
+        </NavLink></li>
+        <li><NavLink href="/inventory" class="nav-item" ActiveClass="nav-item-active">
+            <span class="mr-2.5">📊</span>Inventory
+        </NavLink></li>
+        <li><NavLink href="/customers" class="nav-item" ActiveClass="nav-item-active">
+            <span class="mr-2.5">👥</span>Customers
+        </NavLink></li>
+        <li><NavLink href="/invoices" class="nav-item" ActiveClass="nav-item-active">
+            <span class="mr-2.5">🧾</span>Invoices
+        </NavLink></li>
+        <li><NavLink href="/outbox" class="nav-item" ActiveClass="nav-item-active">
+            <span class="mr-2.5">📨</span>Outbox Queue
+        </NavLink></li>
+        <li><NavLink href="/audit" class="nav-item" ActiveClass="nav-item-active">
+            <span class="mr-2.5">📋</span>Audit Log
+        </NavLink></li>
+    </ul>
+</nav>
+
+<style>
+    .nav-item {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        color: #94a3b8;
+        text-decoration: none;
+        transition: background 0.1s, color 0.1s;
+    }
+    .nav-item:hover { background: #1e293b; color: #e2e8f0; }
+    .nav-item-active { background: #1e293b; color: #f8fafc; font-weight: 500; }
+</style>

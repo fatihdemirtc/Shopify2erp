@@ -1,0 +1,15 @@
+@{
+    var (bg, text) = Status?.ToLower() switch
+    {
+        "completed" or "created" or "synced" => ("bg-emerald-100", "text-emerald-700"),
+        "pending"   => ("bg-amber-100",  "text-amber-700"),
+        "processing"=> ("bg-blue-100",   "text-blue-700"),
+        "failed"    => ("bg-red-100",    "text-red-700"),
+        _           => ("bg-slate-100",  "text-slate-700")
+    };
+}
+<span class="px-2 py-0.5 rounded text-xs font-medium @bg @text">@Status</span>
+
+@code {
+    [Parameter] public string? Status { get; set; }
+}

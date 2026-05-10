@@ -1,0 +1,52 @@
+@page "/customers"
+@inject IDbContextFactory<AppDbContext> DbFactory
+
+<Microsoft.AspNetCore.Components.Sections.SectionContent SectionName="page-title">Customers</Microsoft.AspNetCore.Components.Sections.SectionContent>
+
+<div class="bg-white rounded-lg border border-slate-200 shadow-sm">
+    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+        <h2 class="font-semibold text-slate-800">Customers</h2>
+        <span class="text-sm text-slate-500">@_customers.Count total</span>
+    </div>
+
+    <table class="w-full text-sm">
+        <thead class="bg-slate-50">
+            <tr>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</th>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Email</th>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Phone</th>
+                <th class="text-right px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Orders</th>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Joined</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var (customer, i) in _customers.Select((c, i) => (c, i)))
+            {
+                <tr class="@(i % 2 == 0 ? "bg-white" : "bg-slate-50") hover:bg-slate-100 transition-colors">
+                    <td class="px-6 py-3 font-medium text-slate-800">@customer.Name</td>
+                    <td class="px-6 py-3 text-slate-600">@(customer.Email ?? "—")</td>
+                    <td class="px-6 py-3 text-slate-600">@(customer.Phone ?? "—")</td>
+                    <td class="px-6 py-3 text-right font-semibold text-slate-700">@customer.Orders.Count</td>
+                    <td class="px-6 py-3 text-slate-500 text-xs">@customer.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd")</td>
+                </tr>
+            }
+            @if (!_customers.Any())
+            {
+                <tr><td colspan="5" class="px-6 py-10 text-center text-slate-400">No customers yet</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private List<Customer> _customers = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+        _customers = await db.Customers
+            .Include(c => c.Orders)
+            .OrderByDescending(c => c.CreatedAt)
+            .ToListAsync();
+    }
+}

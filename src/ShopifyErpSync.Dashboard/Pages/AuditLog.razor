@@ -1,0 +1,63 @@
+@page "/audit"
+@inject IDbContextFactory<AppDbContext> DbFactory
+
+<Microsoft.AspNetCore.Components.Sections.SectionContent SectionName="page-title">Audit Log</Microsoft.AspNetCore.Components.Sections.SectionContent>
+
+<div class="bg-white rounded-lg border border-slate-200 shadow-sm">
+    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+        <h2 class="font-semibold text-slate-800">Audit Log</h2>
+        <span class="text-sm text-slate-500">Last 200 entries</span>
+    </div>
+
+    <table class="w-full text-sm">
+        <thead class="bg-slate-50">
+            <tr>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Time</th>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Action</th>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Entity</th>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">ID</th>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Details</th>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var (entry, i) in _entries.Select((e, i) => (e, i)))
+            {
+                <tr class="@(i % 2 == 0 ? "bg-white" : "bg-slate-50") hover:bg-slate-100 transition-colors">
+                    <td class="px-6 py-3 text-slate-500 text-xs whitespace-nowrap">@entry.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td class="px-6 py-3 font-medium text-slate-800 whitespace-nowrap">@entry.Action</td>
+                    <td class="px-6 py-3 text-slate-600">@(entry.EntityType ?? "—")</td>
+                    <td class="px-6 py-3 font-mono text-xs text-slate-500">@(entry.EntityId ?? "—")</td>
+                    <td class="px-6 py-3 text-slate-600 max-w-sm truncate">@(entry.Details ?? "—")</td>
+                    <td class="px-6 py-3">
+                        @if (entry.Success)
+                        {
+                            <span class="px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-700">✅ OK</span>
+                        }
+                        else
+                        {
+                            <span class="px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">❌ Failed</span>
+                        }
+                    </td>
+                </tr>
+            }
+            @if (!_entries.Any())
+            {
+                <tr><td colspan="6" class="px-6 py-10 text-center text-slate-400">No audit entries yet</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private List<AuditLogEntry> _entries = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+        _entries = await db.AuditLog
+            .OrderByDescending(a => a.CreatedAt)
+            .Take(200)
+            .ToListAsync();
+    }
+}

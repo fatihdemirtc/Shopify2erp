@@ -1,0 +1,17 @@
+{
+  "id": 12345678901,
+  "order_number": "1001",
+  "customer": {
+    "id": 9876543210,
+    "name": "Test Customer",
+    "email": "test@example.com",
+    "phone": "+15551234567"
+  },
+  "line_items": [
+    { "sku": "TS-RM",  "name": "Red T-Shirt M",   "quantity": 2, "price": 29.99 },
+    { "sku": "CAP-BLK","name": "Black Cap",        "quantity": 1, "price": 19.99 }
+  ],
+  "subtotal": 79.97,
+  "vat": 14.39,
+  "total": 94.36
+}

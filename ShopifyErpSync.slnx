@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ShopifyErpSync.Api/ShopifyErpSync.Api.csproj" />
+    <Project Path="src/ShopifyErpSync.Core/ShopifyErpSync.Core.csproj" />
+    <Project Path="src/ShopifyErpSync.Dashboard/ShopifyErpSync.Dashboard.csproj" />
+    <Project Path="src/ShopifyErpSync.Infrastructure/ShopifyErpSync.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ShopifyErpSync.Tests/ShopifyErpSync.Tests.csproj" />
+  </Folder>
+</Solution>

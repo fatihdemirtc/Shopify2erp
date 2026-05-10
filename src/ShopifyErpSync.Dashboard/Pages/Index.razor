@@ -1,0 +1,137 @@
+@page "/"
+@inject IDbContextFactory<AppDbContext> DbFactory
+@implements IDisposable
+
+<Microsoft.AspNetCore.Components.Sections.SectionContent SectionName="page-title">Dashboard</Microsoft.AspNetCore.Components.Sections.SectionContent>
+
+<div class="space-y-6">
+    <!-- Metric cards -->
+    <div class="grid grid-cols-4 gap-4">
+        <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Orders Today</p>
+            <p class="text-3xl font-bold text-slate-900">@_ordersToday</p>
+        </div>
+        <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Revenue Today</p>
+            <p class="text-3xl font-bold text-slate-900">$@_revenueToday.ToString("N2")</p>
+        </div>
+        <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Sync Success (24h)</p>
+            <p class="text-3xl font-bold @(_successRate >= 95 ? "text-emerald-600" : "text-amber-600")">@_successRate.ToString("F0")%</p>
+        </div>
+        <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Pending in Queue</p>
+            <p class="text-3xl font-bold @(_pendingCount > 0 ? "text-amber-600" : "text-slate-900")">@_pendingCount</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4">
+        <!-- Recent orders -->
+        <div class="col-span-2 bg-white rounded-lg border border-slate-200 shadow-sm">
+            <div class="px-5 py-4 border-b border-slate-100">
+                <h2 class="font-semibold text-slate-800">Recent Orders</h2>
+            </div>
+            <table class="w-full text-sm">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Order</th>
+                        <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Customer</th>
+                        <th class="text-right px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Total</th>
+                        <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                        <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var (order, i) in _recentOrders.Select((o, i) => (o, i)))
+                    {
+                        <tr class="@(i % 2 == 0 ? "bg-white" : "bg-slate-50") hover:bg-slate-100 transition-colors">
+                            <td class="px-5 py-3 font-medium text-slate-800">#@order.OrderNumber</td>
+                            <td class="px-5 py-3 text-slate-600">@order.Customer?.Name</td>
+                            <td class="px-5 py-3 text-right font-medium">$@order.Total.ToString("N2")</td>
+                            <td class="px-5 py-3"><StatusBadge Status="@order.Status" /></td>
+                            <td class="px-5 py-3 text-slate-500 text-xs">@order.CreatedAt.ToLocalTime().ToString("HH:mm:ss")</td>
+                        </tr>
+                    }
+                    @if (!_recentOrders.Any())
+                    {
+                        <tr><td colspan="5" class="px-5 py-8 text-center text-slate-400">No orders yet</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Outbox health -->
+        <div class="bg-white rounded-lg border border-slate-200 shadow-sm">
+            <div class="px-5 py-4 border-b border-slate-100">
+                <h2 class="font-semibold text-slate-800">Outbox Health</h2>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-slate-600">Pending</span>
+                    <span class="text-sm font-semibold text-amber-600">@_pendingCount</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-slate-600">Processing</span>
+                    <span class="text-sm font-semibold text-blue-600">@_processingCount</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-slate-600">Completed</span>
+                    <span class="text-sm font-semibold text-emerald-600">@_completedCount</span>
+                </div>
+                <div class="flex justify-between items-center border-t border-slate-100 pt-4">
+                    <span class="text-sm text-slate-600">Failed</span>
+                    <span class="text-sm font-semibold @(_failedCount > 0 ? "text-red-600" : "text-slate-400")">@_failedCount</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Order> _recentOrders = new();
+    private int _ordersToday, _pendingCount, _processingCount, _completedCount, _failedCount;
+    private decimal _revenueToday;
+    private double _successRate;
+    private System.Threading.Timer? _timer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+        _timer = new System.Threading.Timer(async _ =>
+        {
+            await LoadDataAsync();
+            await InvokeAsync(StateHasChanged);
+        }, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
+    }
+
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            await using var db = await DbFactory.CreateDbContextAsync();
+            var today = DateTime.UtcNow.Date;
+
+            _recentOrders = await db.Orders
+                .Include(o => o.Customer)
+                .OrderByDescending(o => o.CreatedAt)
+                .Take(20)
+                .ToListAsync();
+
+            _ordersToday = await db.Orders.CountAsync(o => o.CreatedAt >= today);
+            _revenueToday = await db.Orders.Where(o => o.CreatedAt >= today).SumAsync(o => (decimal?)o.Total) ?? 0;
+
+            _pendingCount = await db.OutboxMessages.CountAsync(m => m.Status == "pending");
+            _processingCount = await db.OutboxMessages.CountAsync(m => m.Status == "processing");
+            _completedCount = await db.OutboxMessages.CountAsync(m => m.Status == "completed");
+            _failedCount = await db.OutboxMessages.CountAsync(m => m.Status == "failed");
+
+            var since = DateTime.UtcNow.AddHours(-24);
+            var total24h = await db.AuditLog.CountAsync(a => a.Action == "OrderSynced" || a.Action == "OrderSyncFailed" && a.CreatedAt >= since);
+            var success24h = await db.AuditLog.CountAsync(a => a.Action == "OrderSynced" && a.CreatedAt >= since);
+            _successRate = total24h > 0 ? (double)success24h / total24h * 100 : 100;
+        }
+        catch { }
+    }
+
+    public void Dispose() => _timer?.Dispose();
+}

@@ -1,0 +1,27 @@
+@page "/"
+@using Microsoft.AspNetCore.Components.Web
+@namespace ShopifyErpSync.Dashboard.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="~/" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="css/site.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="favicon.png"/>
+    <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
+</head>
+<body class="bg-slate-50 text-slate-900">
+    <component type="typeof(App)" render-mode="ServerPrerendered" />
+
+    <div id="blazor-error-ui" style="display:none; position:fixed; bottom:0; left:0; right:0; background:#fee2e2; padding:1rem; text-align:center;">
+        An unhandled error occurred.
+        <a href="" class="underline font-semibold">Reload</a>
+    </div>
+
+    <script src="_framework/blazor.server.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+@page "/invoices"
+@inject IDbContextFactory<AppDbContext> DbFactory
+
+<Microsoft.AspNetCore.Components.Sections.SectionContent SectionName="page-title">Invoices</Microsoft.AspNetCore.Components.Sections.SectionContent>
+
+<div class="bg-white rounded-lg border border-slate-200 shadow-sm">
+    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+        <h2 class="font-semibold text-slate-800">Invoices</h2>
+        <span class="text-sm text-slate-500">@_invoices.Count total</span>
+    </div>
+
+    <table class="w-full text-sm">
+        <thead class="bg-slate-50">
+            <tr>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Invoice #</th>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Order</th>
+                <th class="text-right px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Total</th>
+                <th class="text-right px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">VAT</th>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var (inv, i) in _invoices.Select((v, i) => (v, i)))
+            {
+                <tr class="@(i % 2 == 0 ? "bg-white" : "bg-slate-50") hover:bg-slate-100 transition-colors">
+                    <td class="px-6 py-3 font-mono text-xs font-medium text-slate-800">@inv.InvoiceNumber</td>
+                    <td class="px-6 py-3 text-slate-600">#@inv.Order?.OrderNumber</td>
+                    <td class="px-6 py-3 text-right font-semibold text-slate-800">$@inv.Total.ToString("N2")</td>
+                    <td class="px-6 py-3 text-right text-slate-500">$@inv.Vat.ToString("N2")</td>
+                    <td class="px-6 py-3"><StatusBadge Status="@inv.Status" /></td>
+                    <td class="px-6 py-3 text-slate-500 text-xs">@inv.InvoiceDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                </tr>
+            }
+            @if (!_invoices.Any())
+            {
+                <tr><td colspan="6" class="px-6 py-10 text-center text-slate-400">No invoices yet</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private List<Invoice> _invoices = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+        _invoices = await db.Invoices
+            .Include(i => i.Order)
+            .OrderByDescending(i => i.InvoiceDate)
+            .ToListAsync();
+    }
+}
