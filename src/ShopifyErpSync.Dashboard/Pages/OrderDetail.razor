@@ -1,0 +1,139 @@
+@page "/orders/{Id:int}"
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject NavigationManager Nav
+
+<Microsoft.AspNetCore.Components.Sections.SectionContent SectionName="page-title">Order Detail</Microsoft.AspNetCore.Components.Sections.SectionContent>
+
+@if (_order is null)
+{
+    <div class="flex items-center justify-center h-48 text-slate-400">Loading…</div>
+}
+else
+{
+    <div class="space-y-4">
+        <!-- Back -->
+        <button @onclick='() => Nav.NavigateTo("/orders")'
+                class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors">
+            ← Back to Orders
+        </button>
+
+        <!-- Header card -->
+        <div class="bg-white rounded-xl shadow-card p-6 flex flex-wrap gap-6 items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Order</p>
+                <p class="text-2xl font-bold text-slate-900">#@_order.OrderNumber</p>
+                <p class="text-xs text-slate-400 mt-1">@_order.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</p>
+            </div>
+            <div>
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Customer</p>
+                <p class="text-sm font-semibold text-slate-800">@_order.Customer?.Name</p>
+                <p class="text-xs text-slate-500">@_order.Customer?.Email</p>
+                <p class="text-xs text-slate-500">@_order.Customer?.Phone</p>
+            </div>
+            <div class="text-right">
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Status</p>
+                <StatusBadge Status="@_order.Status" />
+            </div>
+            <div class="text-right">
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Total</p>
+                <p class="text-2xl font-bold text-slate-900">$@_order.Total.ToString("N2")</p>
+                @if (_order.Vat > 0)
+                {
+                    <p class="text-xs text-slate-400">incl. $@_order.Vat.ToString("N2") tax</p>
+                }
+            </div>
+        </div>
+
+        <!-- Line items -->
+        <div class="bg-white rounded-xl shadow-card overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100">
+                <h2 class="font-semibold text-slate-800">Line Items</h2>
+            </div>
+            <table class="w-full text-sm">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Product</th>
+                        <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">SKU</th>
+                        <th class="text-right px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Unit Price</th>
+                        <th class="text-right px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Qty</th>
+                        <th class="text-right px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Line Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var (item, i) in _order.OrderItems.Select((x, i) => (x, i)))
+                    {
+                        <tr class="@(i % 2 == 0 ? "bg-white" : "bg-slate-50/50")">
+                            <td class="px-6 py-3 font-medium text-slate-800">@item.Product?.Name</td>
+                            <td class="px-6 py-3 font-mono text-xs text-slate-500">@item.Product?.Sku</td>
+                            <td class="px-6 py-3 text-right text-slate-600">$@item.UnitPrice.ToString("N2")</td>
+                            <td class="px-6 py-3 text-right text-slate-800 font-semibold">@item.Quantity</td>
+                            <td class="px-6 py-3 text-right font-semibold text-slate-900">$@item.LineTotal.ToString("N2")</td>
+                        </tr>
+                    }
+                    @if (!_order.OrderItems.Any())
+                    {
+                        <tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">No line items</td></tr>
+                    }
+                </tbody>
+                <tfoot class="border-t border-slate-200 bg-slate-50">
+                    <tr>
+                        <td colspan="4" class="px-6 py-3 text-right text-sm font-semibold text-slate-600">Subtotal</td>
+                        <td class="px-6 py-3 text-right font-semibold text-slate-800">$@_order.Subtotal.ToString("N2")</td>
+                    </tr>
+                    @if (_order.Vat > 0)
+                    {
+                        <tr>
+                            <td colspan="4" class="px-6 py-2 text-right text-sm text-slate-500">Tax</td>
+                            <td class="px-6 py-2 text-right text-slate-500">$@_order.Vat.ToString("N2")</td>
+                        </tr>
+                    }
+                    <tr class="border-t border-slate-200">
+                        <td colspan="4" class="px-6 py-3 text-right text-sm font-bold text-slate-800">Total</td>
+                        <td class="px-6 py-3 text-right font-bold text-slate-900 text-base">$@_order.Total.ToString("N2")</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Invoice -->
+        @if (_order.Invoice is not null)
+        {
+            <div class="bg-white rounded-xl shadow-card p-6">
+                <h2 class="font-semibold text-slate-800 mb-4">Invoice</h2>
+                <div class="flex flex-wrap gap-6">
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Invoice #</p>
+                        <p class="font-mono text-sm font-semibold text-slate-800">@_order.Invoice.InvoiceNumber</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Date</p>
+                        <p class="text-sm text-slate-700">@_order.Invoice.InvoiceDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Total</p>
+                        <p class="text-sm font-semibold text-slate-800">$@_order.Invoice.Total.ToString("N2")</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Status</p>
+                        <StatusBadge Status="@_order.Invoice.Status" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private Order? _order;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+        _order = await db.Orders
+            .Include(o => o.Customer)
+            .Include(o => o.OrderItems).ThenInclude(i => i.Product)
+            .Include(o => o.Invoice)
+            .FirstOrDefaultAsync(o => o.Id == Id);
+    }
+}
