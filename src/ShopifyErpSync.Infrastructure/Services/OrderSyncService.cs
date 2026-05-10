@@ -61,6 +61,7 @@ public class OrderSyncService : IOrderSyncService
 
             await _erp.GenerateInvoiceAsync(order, ct);
 
+            order.Status = "completed";
             await _db.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
 
