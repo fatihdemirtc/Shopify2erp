@@ -182,7 +182,7 @@ What gets created per order:
 
 | Shopify Orders | Odoo Sale Orders | Slack Notification |
 |---|---|---|
-| *(add screenshot)* | *(add screenshot)* | *(add screenshot)* |
+| ![Shopify](docs/screenshots/shopify-orders.png) | ![Odoo](docs/screenshots/odoo-orders.png) | ![Slack](docs/screenshots/slack-notification.png) |
 
 ---
 
