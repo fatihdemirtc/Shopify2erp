@@ -4,6 +4,12 @@ namespace ShopifyErpSync.Core.Models.Shopify;
 
 public class ShopifyLineItem
 {
+    [JsonPropertyName("id")]
+    public long Id { get; set; }
+
+    [JsonPropertyName("variant_id")]
+    public long? VariantId { get; set; }
+
     [JsonPropertyName("sku")]
     public string? Sku { get; set; }
 

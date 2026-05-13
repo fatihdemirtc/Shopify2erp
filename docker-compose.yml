@@ -12,7 +12,14 @@ services:
       - ConnectionStrings__Default=Server=db;Database=ShopifyErpSync;User=sa;Password=Strong_P@ss123;TrustServerCertificate=true
       - Shopify__WebhookSecret=${SHOPIFY_WEBHOOK_SECRET:-dev-webhook-secret-change-in-production}
       - Slack__WebhookUrl=${SLACK_WEBHOOK_URL:-}
-      - Erp__Adapter=Sql
+      - Erp__Adapter=${ERP_ADAPTER:-Sql}
+      - Odoo__BaseUrl=${ODOO_BASE_URL:-http://host.docker.internal:8069}
+      - Odoo__Database=${ODOO_DB:-odoo}
+      - Odoo__Username=${ODOO_USER:-admin}
+      - Odoo__ApiKey=${ODOO_API_KEY:-}
+      - Odoo__StockLocationId=${ODOO_STOCK_LOCATION_ID:-8}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       db:
         condition: service_healthy

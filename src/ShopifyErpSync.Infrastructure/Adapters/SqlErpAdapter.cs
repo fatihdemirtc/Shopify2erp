@@ -57,19 +57,25 @@ public class SqlErpAdapter : IErpAdapter
 
         foreach (var lineItem in shopifyOrder.LineItems)
         {
-            if (string.IsNullOrEmpty(lineItem.Sku))
-            {
-                _logger.LogWarning("Line item '{Name}' has no SKU — skipping", lineItem.Name);
-                continue;
-            }
+            var sku = !string.IsNullOrEmpty(lineItem.Sku)
+                ? lineItem.Sku
+                : lineItem.VariantId.HasValue
+                    ? $"VARIANT-{lineItem.VariantId}"
+                    : $"ITEM-{lineItem.Id}";
 
-            var product = await _db.Products
-                .FirstOrDefaultAsync(p => p.Sku == lineItem.Sku, ct);
+            var product = await _db.Products.FirstOrDefaultAsync(p => p.Sku == sku, ct);
 
             if (product is null)
             {
-                _logger.LogWarning("SKU {Sku} not found — skipping line item", lineItem.Sku);
-                continue;
+                product = new Product
+                {
+                    Sku = sku,
+                    Name = lineItem.Name.Length > 200 ? lineItem.Name[..200] : lineItem.Name,
+                    Price = lineItem.Price,
+                    StockQuantity = 0
+                };
+                _db.Products.Add(product);
+                _logger.LogInformation("Auto-registered product {Sku} from order line item", sku);
             }
 
             order.OrderItems.Add(new OrderItem

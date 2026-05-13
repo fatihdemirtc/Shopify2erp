@@ -56,8 +56,15 @@ public class OrderSyncService : IOrderSyncService
             var customer = await _erp.GetOrCreateCustomerAsync(shopifyCustomer, ct);
             var order = await _erp.CreateOrderAsync(shopifyOrder, customer, ct);
 
-            foreach (var lineItem in shopifyOrder.LineItems.Where(l => !string.IsNullOrEmpty(l.Sku)))
-                await _erp.DecrementStockAsync(lineItem.Sku!, lineItem.Quantity, ct);
+            foreach (var lineItem in shopifyOrder.LineItems)
+            {
+                var sku = !string.IsNullOrEmpty(lineItem.Sku)
+                    ? lineItem.Sku
+                    : lineItem.VariantId.HasValue
+                        ? $"VARIANT-{lineItem.VariantId}"
+                        : $"ITEM-{lineItem.Id}";
+                await _erp.DecrementStockAsync(sku, lineItem.Quantity, ct);
+            }
 
             await _erp.GenerateInvoiceAsync(order, ct);
 
