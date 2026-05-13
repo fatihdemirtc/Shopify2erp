@@ -180,11 +180,9 @@ What gets created per order:
 
 ## Screenshots
 
-| Dashboard | Orders | Inventory |
+| Shopify Orders | Odoo Sale Orders | Slack Notification |
 |---|---|---|
 | *(add screenshot)* | *(add screenshot)* | *(add screenshot)* |
-
-> **Tip:** Run `docker-compose up --build`, open http://localhost:5011, send a test webhook via `.\requests\send-webhook.ps1`, and screenshot the live dashboard for best effect.
 
 ---
 
