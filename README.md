@@ -61,7 +61,8 @@ sequenceDiagram
 - **Database transactions** — customer + order + stock + invoice created atomically or not at all
 
 ### Adaptability
-- **ERP adapter pattern** — swap between SQL-based ERPs (custom databases, legacy systems) and REST-based ERPs (NetSuite, SAP, Odoo, Dynamics 365) via one config line
+- **3 built-in adapters** — **SQL** (custom/legacy databases), **REST API** (NetSuite, SAP, Dynamics 365), **Odoo Community** (XML-RPC + API key, tested on Odoo 19)
+- **Swap adapters with one config line** — `ERP_ADAPTER=Sql|RestApi|Odoo`
 - **Interface-driven** — `IErpAdapter` has 4 methods; implement them for any ERP in under 200 lines
 
 ### Observability
@@ -85,6 +86,7 @@ sequenceDiagram
 | Dashboard | Blazor Server + Tailwind CSS |
 | Testing | xUnit + FluentAssertions + Moq |
 | Containerization | Docker + docker-compose |
+| ERP Integration | Odoo 19 Community (XML-RPC, API key auth) |
 
 ---
 
@@ -152,6 +154,28 @@ Then in `appsettings.json`:
 
 And register in `DependencyInjection.cs`. Done.
 
+### Odoo Community (built-in)
+
+Tested on Odoo 19. Requires `sale_management`, `account`, `stock` modules installed.
+
+```env
+ERP_ADAPTER=Odoo
+ODOO_BASE_URL=http://your-odoo:8069
+ODOO_DB=odoo
+ODOO_USER=admin@company.com
+ODOO_API_KEY=your_api_key_here
+ODOO_STOCK_LOCATION_ID=8
+```
+
+Generate an API key in Odoo: **Settings → Technical → API Keys → New**.
+
+What gets created per order:
+- `res.partner` — customer (keyed by `ref = shopify_{id}`, idempotent)
+- `product.template` + `product.product` — one per line item SKU (created if missing)
+- `sale.order` → auto-confirmed via `action_confirm`
+- `stock.quant` — decremented per line item
+- `account.move` (out_invoice) → posted via `action_post`
+
 ---
 
 ## Screenshots
@@ -159,6 +183,8 @@ And register in `DependencyInjection.cs`. Done.
 | Dashboard | Orders | Inventory |
 |---|---|---|
 | *(add screenshot)* | *(add screenshot)* | *(add screenshot)* |
+
+> **Tip:** Run `docker-compose up --build`, open http://localhost:5011, send a test webhook via `.\requests\send-webhook.ps1`, and screenshot the live dashboard for best effect.
 
 ---
 
